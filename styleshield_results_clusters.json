@@ -1,0 +1,65 @@
+{
+  "0": {
+    "member_count": 30,
+    "members": [
+      "claude_account_00",
+      "claude_account_01",
+      "claude_account_02",
+      "claude_account_03",
+      "claude_account_04",
+      "claude_account_05",
+      "claude_account_06",
+      "claude_account_07",
+      "claude_account_08",
+      "claude_account_09",
+      "gpt4_account_00",
+      "gpt4_account_01",
+      "gpt4_account_02",
+      "gpt4_account_03",
+      "gpt4_account_04",
+      "gpt4_account_05",
+      "gpt4_account_06",
+      "gpt4_account_07",
+      "gpt4_account_08",
+      "gpt4_account_09",
+      "human_account_00",
+      "human_account_01",
+      "human_account_02",
+      "human_account_03",
+      "human_account_04",
+      "human_account_05",
+      "human_account_06",
+      "human_account_07",
+      "human_account_08",
+      "human_account_09"
+    ],
+    "binding_features": {
+      "semicolon_rate": {
+        "mean": 0.0,
+        "std": 0.0,
+        "uniformity": 1.0
+      },
+      "dash_rate": {
+        "mean": 0.0,
+        "std": 0.0,
+        "uniformity": 1.0
+      },
+      "intra_vocab_variance": {
+        "mean": 0.0015,
+        "std": 0.0013,
+        "uniformity": 0.9987
+      },
+      "contraction_rate": {
+        "mean": 0.054,
+        "std": 0.0188,
+        "uniformity": 0.9815
+      },
+      "comma_rate": {
+        "mean": 0.0462,
+        "std": 0.0294,
+        "uniformity": 0.9714
+      }
+    },
+    "coordination_signal": 0.7289
+  }
+}
