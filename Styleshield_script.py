@@ -367,6 +367,7 @@ class AccountClusterAnalyzer:
     def describe_clusters(self, cluster_df, fingerprints):
         summary = {}
         for cid in cluster_df[~cluster_df["is_noise"]]["cluster_id"].unique():
+            cid = int(cid)  # JSON keys must be native int, not numpy.int64
             members = cluster_df[cluster_df["cluster_id"] == cid]["account_id"].tolist()
             fps = [fingerprints[a] for a in members if a in fingerprints]
             if not fps:
