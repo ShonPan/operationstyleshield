@@ -304,7 +304,7 @@ class MultiMetricBotScorer:
         tc = self.compute_temporal_contextual(posting_hours)
         ca = self.compute_cross_account_correlation(account_id, fingerprints)
 
-        combined = 0.25*vu + 0.25*sr + 0.20*hf + 0.20*tc + 0.10*ca
+        combined = 0.20*vu + 0.45*sr + 0.15*hf + 0.15*tc + 0.05*ca
 
         metrics = {
             "vocabulary_uniformity":     round(vu, 4),
@@ -462,10 +462,10 @@ class CSVLoader:
     Run `scorer.loader.save_template("template.csv")` for a blank template.
     """
 
-    ACCOUNT_ALIASES   = ["account_id", "account", "user_id", "user", "username", "handle", "author", "tweet_id"]
+    ACCOUNT_ALIASES   = ["account_id", "account", "user_id", "user", "username", "handle", "author", "name"]
     POST_ALIASES      = ["post_text", "text", "content", "body", "post", "tweet", "message", "comment", "tweet_text"]
     HOUR_ALIASES      = ["posting_hour", "hour", "post_hour", "hour_of_day"]
-    TIMESTAMP_ALIASES = ["post_timestamp", "timestamp", "created_at", "date", "datetime", "time", "posted_at"]
+    TIMESTAMP_ALIASES = ["post_timestamp", "timestamp", "created_at", "date", "datetime", "time", "posted_at", "tweet_created"]
 
     def load(self, csv_path: str) -> Dict:
         """Load a single CSV. Returns accounts dict."""
@@ -639,44 +639,45 @@ class StyleShieldScorer:
     # CSV entry points
     # ------------------------------------------------------------------
 
-    def analyze_csv(self, *csv_paths: str) -> Tuple[pd.DataFrame, Dict]:
+    def analyze_csv(self, train_paths: List[str], test_paths: List[str]) -> Tuple[pd.DataFrame, Dict]:
         """
-        Load one or more CSV files and run the full detection pipeline.
-
-        Accepts any mix of long-format or wide-format CSVs (auto-detected).
-        Multiple files are merged before analysis.
-
-        Examples
-        --------
-        results, clusters = scorer.analyze_csv("accounts.csv")
-        results, clusters = scorer.analyze_csv("training.csv", "test.csv")
+        Load separate training and testing CSV files.
         """
-        print(f"\nLoading {len(csv_paths)} CSV file(s)...")
-        accounts = (self.loader.load(csv_paths[0]) if len(csv_paths) == 1
-                    else self.loader.load_multiple(*csv_paths))
-        print(f"  Total accounts loaded: {len(accounts)}\n")
-        return self.analyze_accounts(accounts)
+        print(f"\nLoading training data from {len(train_paths)} file(s)...")
+        train_accounts = self.loader.load_multiple(*train_paths) if train_paths else {}
+        
+        print(f"\nLoading testing data from {len(test_paths)} file(s)...")
+        test_accounts = self.loader.load_multiple(*test_paths)
+        
+        print(f"\nTotal training accounts: {len(train_accounts)}")
+        print(f"Total testing accounts:  {len(test_accounts)}\n")
+        
+        return self.analyze_accounts(test_accounts, train_accounts=train_accounts)
 
     # ------------------------------------------------------------------
     # Core pipeline
     # ------------------------------------------------------------------
 
-    def analyze_accounts(self, accounts: Dict) -> Tuple[pd.DataFrame, Dict]:
+    def analyze_accounts(self, accounts: Dict, train_accounts: Optional[Dict] = None) -> Tuple[pd.DataFrame, Dict]:
         """
         Full pipeline: extract → score → cluster → confidence.
         Returns (results_df, cluster_summary).
         """
+        if train_accounts is None:
+            train_accounts = {}
+            
         print("=" * 60)
         print("STYLESHIELD: BOT NETWORK DETECTION PIPELINE")
         print("=" * 60)
 
         # 1. Fingerprinting
-        print(f"\n[1/4] Extracting stylometric fingerprints ({len(accounts)} accounts)...")
+        all_accounts = {**train_accounts, **accounts}
+        print(f"\n[1/4] Extracting stylometric fingerprints ({len(all_accounts)} accounts total)...")
         fingerprints = {aid: self.extractor.extract(data.get("posts", []))
-                        for aid, data in accounts.items()}
+                        for aid, data in all_accounts.items()}
 
-        # 2. Per-account bot scores
-        print("\n[2/4] Computing multi-metric bot scores...")
+        # 2. Per-account bot scores (only for testing accounts)
+        print("\n[2/4] Computing multi-metric bot scores for test accounts...")
         all_scores = {}
         for account_id in accounts:
             bot_score, metrics = self.scorer.compute_combined_bot_score(
@@ -690,13 +691,16 @@ class StyleShieldScorer:
         # 3. Clustering
         print("\n[3/4] Running DBSCAN cluster analysis...")
         cluster_df      = self.clusterer.cluster(fingerprints)
+        # Filter cluster_df to only include test accounts for the final results
+        test_cluster_df = cluster_df[cluster_df["account_id"].isin(accounts.keys())]
+        
         cluster_sizes   = cluster_df[~cluster_df["is_noise"]].groupby("cluster_id").size().to_dict()
         cluster_summary = self.clusterer.describe_clusters(cluster_df, fingerprints)
 
         # 4. Adaptive confidence
         print("\n[4/4] Computing adaptive confidence scores...")
         rows = []
-        for _, row in cluster_df.iterrows():
+        for _, row in test_cluster_df.iterrows():
             account_id   = row["account_id"]
             cluster_id   = int(row["cluster_id"])
             cluster_size = cluster_sizes.get(cluster_id, 1)
@@ -707,7 +711,7 @@ class StyleShieldScorer:
                 metrics=score_data["metrics"],
                 cluster_id=cluster_id,
                 cluster_size=cluster_size,
-                total_accounts=len(accounts),
+                total_accounts=len(all_accounts),
             )
             rows.append({
                 "account_id":        account_id,
@@ -723,18 +727,22 @@ class StyleShieldScorer:
 
         # Summary
         print("\n" + "=" * 60)
-        print("DETECTION SUMMARY")
+        print("DETECTION SUMMARY (Results for Test set only)")
         print("=" * 60)
-        print(f"Accounts analyzed:    {len(accounts)}")
+        print(f"Core population (train): {len(train_accounts)}")
+        print(f"Accounts analyzed (test): {len(accounts)}")
         print(f"Bot networks found:   {len(cluster_summary)}")
-        print(f"Accounts in networks: {sum(v['member_count'] for v in cluster_summary.values())}")
         print(f"High confidence >0.8: {(results_df['confidence'] > 0.8).sum()}")
 
-        for cid, info in cluster_summary.items():
-            print(f"\nCluster {cid}: {info['member_count']} accounts "
-                  f"(coordination: {info['coordination_signal']:.3f})")
-            print(f"  Members: {', '.join(info['members'])}")
-            print(f"  Binding: {', '.join(list(info['binding_features'].keys())[:3])}")
+        # Only list clusters containing test accounts
+        test_cids = test_cluster_df[~test_cluster_df["is_noise"]]["cluster_id"].unique()
+        for cid in test_cids:
+            if cid not in cluster_summary: continue
+            info = cluster_summary[cid]
+            test_members = [m for m in info['members'] if m in accounts]
+            print(f"\nCluster {cid}: {info['member_count']} total accounts ({len(test_members)} in test set)")
+            print(f"  Coordination: {info['coordination_signal']:.3f}")
+            print(f"  Test Members: {', '.join(test_members[:10])}{' ...' if len(test_members) > 10 else ''}")
 
         return results_df, cluster_summary
 
@@ -838,28 +846,28 @@ if __name__ == "__main__":
         sys.exit(0)
 
     if args.csv_files:
-        results, clusters = scorer.analyze_csv(*args.csv_files)
+        # If user provides files, treat all as test set for now (or split if even?)
+        # For simplicity, if they provided files, we'll just run them as test.
+        results, clusters = scorer.analyze_csv([], args.csv_files)
     else:
-        # Auto-discover CSVs in ./data/ subfolder
-        data_dir = Path("data")
-        discovered = []
-        if data_dir.exists():
-            discovered = sorted(data_dir.glob("*.csv"))
+        # Auto-discover CSVs in training and test folders
+        train_dir = Path("data/training data")
+        test_dir  = Path("data/Test data")
+        
+        train_csvs = sorted(train_dir.glob("*.csv")) if train_dir.exists() else []
+        test_csvs  = sorted(test_dir.glob("*.csv")) if test_dir.exists() else []
 
-        if discovered:
-            print(f"No CSV files specified — found {len(discovered)} CSV(s) in ./data/:")
-            for p in discovered:
-                print(f"  {p}")
-            print()
-            results, clusters = scorer.analyze_csv(*[str(p) for p in discovered])
+        if train_csvs or test_csvs:
+            print(f"Auto-discovery: found {len(train_csvs)} training and {len(test_csvs)} testing CSVs.")
+            results, clusters = scorer.analyze_csv(
+                [str(p) for p in train_csvs],
+                [str(p) for p in test_csvs]
+            )
         else:
-            print("No CSV files provided and no CSVs found in ./data/")
+            print("No CSVs found in data/training data or data/Test data.")
             print("Running on built-in synthetic dataset.\n")
-            print("Usage:  python styleshield_scorer.py accounts.csv")
-            print("        python styleshield_scorer.py data/train.csv data/test.csv")
-            print("        python styleshield_scorer.py --template\n")
             csv_path = _write_synthetic_csvs()
-            results, clusters = scorer.analyze_csv(csv_path)
+            results, clusters = scorer.analyze_csv([], [csv_path])
 
     # Print top results
     print("\n\nTOP 15 ACCOUNTS BY CONFIDENCE:")
@@ -871,12 +879,4 @@ if __name__ == "__main__":
     # Export
     results.to_csv(args.output, index=False)
     clusters_path = args.output.replace(".csv", "_clusters.json")
-    with open(clusters_path, "w") as f:
-        # DBSCAN returns numpy int keys; JSON requires strings
-        clusters_serializable = {str(k): v for k, v in clusters.items()}
-        json.dump(clusters_serializable, f, indent=2,
-                  default=lambda o: int(o) if isinstance(o, __import__("numpy").integer) else float(o))
-
-    print(f"\nExported: {args.output}, {clusters_path}")
-    print("StyleShield complete.")
 
