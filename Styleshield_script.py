@@ -816,7 +816,7 @@ class CSVLoader:
     Column name matching is case-insensitive with common aliases.
     """
 
-    ACCOUNT_ALIASES   = ["account_id", "account", "user_id", "user", "username", "handle", "author", "name"]
+    ACCOUNT_ALIASES   = ["account_id", "account", "user_id", "user", "username", "handle", "author", "name", "id"]
     POST_ALIASES      = ["post_text", "text", "content", "body", "post", "tweet", "message", "comment", "tweet_text"]
     HOUR_ALIASES      = ["posting_hour", "hour", "post_hour", "hour_of_day"]
     TIMESTAMP_ALIASES = ["post_timestamp", "timestamp", "created_at", "date", "datetime", "time", "posted_at", "tweet_created"]
