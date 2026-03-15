@@ -1,5 +1,5 @@
 # StyleShield
-### Coordination detection via stylometric anomaly analysis
+### Botnet detection via stylometric anomaly analysis
 
 **Live demo:** [operationstyleshield.vercel.app](https://operationstyleshield.vercel.app/)
 **Backend API:** [operationstyleshield-production.up.railway.app](https://operationstyleshield-production.up.railway.app)
@@ -9,9 +9,9 @@
 
 ## What is StyleShield?
 
-StyleShield detects coordinated inauthentic behavior by analyzing the natural topology of language. Human writing has predictable texture — varied vocabulary, inconsistent rhythm, personal quirks — with natural entropy. When multiple accounts produce writing that deviates from this natural gradient in the same way, it's evidence of coordination — whether from bot farms, LLM-generated personas, or scripted troll operations.
+StyleShield detects coordinated inauthentic behavior by analyzing the natural topology of language; this tends to capture botnets. Human writing will be pretty varied and messy, with a kind of predictable texture with varied vocabulary, inconsistent rhythm, personal quirks and lots of natural entropy. If multiple accounts produce writing that deviates from this natural gradient in the same way, it forms a kind of "artificial structure" in the language space, which allows us to identify what may be a botnet. We believe that this is a particularly concerning issue for cognitive security at this time, see Doublespeed(https://futurism.com/artificial-intelligence/doublespeed-ai-phone-farm).
 
-Adapted from **Xenarch**, a planetary technosignature detection system that found the Apollo 11 lunar lander at 99.58% confidence, StyleShield applies the same multi-metric anomaly detection to social media.
+This is a form of "transferred leanring" from cstr's  **Xenarch**. This is a planetary technosignature detection system that distinguishes natural lunar features from artificial ones and finds. the Apollo 11 lunar lander at 99.58% confidence. StyleShield is a theory that applies the same multi-metric anomaly detection to social media.
 
 ---
 
@@ -87,6 +87,8 @@ In testing against stealth bots — AI-generated accounts prompted to mimic huma
 | Stealth bots caught | **65%** | 0% |
 | Overall threats caught | **75%** | 30% |
 
+Perhaps most interestingly, these 'stealth accounts' tend to evade naive LLM as a judge but is found in this method. One regression is that this mildly increases the odds of false positives of humans classified as bots.
+
 ---
 
 ## Project structure
@@ -108,5 +110,3 @@ operationstyleshield/
 ## Built at
 
 Frontier Tower Hackathon | March 14–15, 2026 | AI Safety & Evaluation Track (Protocol Labs)
-
-Shon Pan · Caleb Strom · Abdul
