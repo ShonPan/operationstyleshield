@@ -5,11 +5,21 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5174,
-    strictPort: false, // if 5174 busy, Vite uses next free port (CORS updated in api)
+    strictPort: false,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        target: 'http://127.0.0.1:5002',
         changeOrigin: true,
+        // Ensure SSE streams are not buffered by the proxy
+        configure: (proxy) => {
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            if (proxyRes.headers['content-type']?.includes('text/event-stream')) {
+              // Disable any proxy-level buffering for SSE
+              res.setHeader('X-Accel-Buffering', 'no')
+              res.setHeader('Cache-Control', 'no-cache, no-transform')
+            }
+          })
+        },
       },
     },
   },

@@ -1,0 +1,45 @@
+{
+  "0": {
+    "members": [
+      "human_account_00",
+      "human_account_03",
+      "human_account_06",
+      "human_account_09"
+    ],
+    "member_count": 4,
+    "stealth_score": 0.6731,
+    "coordination": 1.0,
+    "avg_naturalness": 0.25,
+    "avg_formality_variance": 0.004815,
+    "avg_pairwise_similarity": 0.0,
+    "is_stealth_network": true
+  },
+  "1": {
+    "members": [
+      "human_account_01",
+      "human_account_04",
+      "human_account_07"
+    ],
+    "member_count": 3,
+    "stealth_score": 0.5377,
+    "coordination": 1.0,
+    "avg_naturalness": 0.75,
+    "avg_formality_variance": 0.008281,
+    "avg_pairwise_similarity": 0.0,
+    "is_stealth_network": true
+  },
+  "2": {
+    "members": [
+      "human_account_02",
+      "human_account_05",
+      "human_account_08"
+    ],
+    "member_count": 3,
+    "stealth_score": 0.493,
+    "coordination": 1.0,
+    "avg_naturalness": 0.75,
+    "avg_formality_variance": 0.02318,
+    "avg_pairwise_similarity": 0.0,
+    "is_stealth_network": true
+  }
+}

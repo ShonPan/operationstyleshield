@@ -1,0 +1,165 @@
+{
+  "clusters": {
+    "0": {
+      "member_count": 2,
+      "members": [
+        "amy_yo",
+        "lauren6127"
+      ],
+      "dominant_model": "human",
+      "model_distribution": {
+        "human": 2
+      },
+      "coordination_signal": 0.7505,
+      "avg_llm_density": 0.0713,
+      "avg_typo_rate": 0.007,
+      "is_bot_network": true
+    },
+    "1": {
+      "member_count": 4,
+      "members": [
+        "casey_eats",
+        "jen_nic27",
+        "kate_ama78",
+        "not_james98"
+      ],
+      "dominant_model": "gpt4",
+      "model_distribution": {
+        "gpt4": 4
+      },
+      "coordination_signal": 1.0,
+      "avg_llm_density": 2.0833,
+      "avg_typo_rate": 0.0,
+      "is_bot_network": true
+    },
+    "2": {
+      "member_count": 9,
+      "members": [
+        "courtney_dan18",
+        "dan_sup15",
+        "dianehub83",
+        "gary1744",
+        "just_chris15",
+        "nicolebase12",
+        "samantha77",
+        "step_fr47",
+        "susan8690"
+      ],
+      "dominant_model": "human",
+      "model_distribution": {
+        "human": 9
+      },
+      "coordination_signal": 0.6881,
+      "avg_llm_density": 0.0788,
+      "avg_typo_rate": 0.0165,
+      "is_bot_network": true
+    },
+    "3": {
+      "member_count": 2,
+      "members": [
+        "jenzone60",
+        "mark_ann40"
+      ],
+      "dominant_model": "human",
+      "model_distribution": {
+        "human": 2
+      },
+      "coordination_signal": 0.7763,
+      "avg_llm_density": 0.0,
+      "avg_typo_rate": 0.0,
+      "is_bot_network": true
+    },
+    "4": {
+      "member_count": 2,
+      "members": [
+        "joebase78",
+        "lauren_sam53"
+      ],
+      "dominant_model": "human",
+      "model_distribution": {
+        "human": 2
+      },
+      "coordination_signal": 0.8411,
+      "avg_llm_density": 0.0,
+      "avg_typo_rate": 0.0,
+      "is_bot_network": true
+    },
+    "5": {
+      "member_count": 3,
+      "members": [
+        "phil4305",
+        "sara_hmm88",
+        "tara_tech"
+      ],
+      "dominant_model": "human",
+      "model_distribution": {
+        "human": 3
+      },
+      "coordination_signal": 0.9955,
+      "avg_llm_density": 0.0,
+      "avg_typo_rate": 0.05,
+      "is_bot_network": true
+    }
+  },
+  "noise": {
+    "count": 31,
+    "accounts": [
+      "alex_hmm94",
+      "aman_yo68",
+      "amy_jak95",
+      "anna_dan14",
+      "ben3484",
+      "brian6228",
+      "case_xo94",
+      "danielleworld11",
+      "emma_rn26",
+      "eric5575",
+      "eric_ok70",
+      "eric_xo4",
+      "ericcrew52",
+      "heatherworld52",
+      "its_casey18",
+      "josh6917",
+      "just_andrew11",
+      "just_phil99",
+      "kevin7788",
+      "meg_rn33",
+      "natalieHQ67",
+      "nick_jes75",
+      "not_nick88",
+      "rachel_mood",
+      "ryan_chill",
+      "ryanstan95",
+      "sean_hmm6",
+      "susanhub29",
+      "tiffany_jos68",
+      "tompls49",
+      "tony_gre30"
+    ],
+    "assessment": "organic",
+    "avg_model_prob_human": 0.9095
+  },
+  "features_used": [
+    "llm_phrase_density",
+    "gpt4_marker_rate",
+    "claude_marker_rate",
+    "model_prob_human",
+    "typo_rate",
+    "contraction_rate",
+    "all_caps_rate",
+    "avg_syllables",
+    "jargon_density",
+    "paragraph_rhythm_score",
+    "sentence_length_variance",
+    "opener_diversity",
+    "intra_vocab_variance",
+    "intra_structure_variance",
+    "intra_hedge_variance",
+    "intra_punctuation_variance",
+    "intra_jargon_variance"
+  ],
+  "parameters": {
+    "epsilon": 1.5,
+    "min_samples": 2
+  }
+}

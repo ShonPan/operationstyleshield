@@ -1,0 +1,295 @@
+{
+  "clusters": {
+    "0": {
+      "member_count": 2,
+      "members": [
+        "ai_progress_now",
+        "innovate_first_tk"
+      ],
+      "dominant_model": "human",
+      "model_distribution": {
+        "human": 2
+      },
+      "binding_features": {
+        "hedge_rate": {
+          "mean": 0.0,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "transition_rate": {
+          "mean": 0.0,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "semicolon_rate": {
+          "mean": 0.0,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "dash_rate": {
+          "mean": 0.0,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "intra_hedge_variance": {
+          "mean": 0.0,
+          "std": 0.0,
+          "uniformity": 1.0
+        }
+      },
+      "coordination_signal": 0.8411,
+      "avg_llm_density": 0.0,
+      "avg_typo_rate": 0.0,
+      "is_bot_network": true
+    },
+    "1": {
+      "member_count": 4,
+      "members": [
+        "gpt4_account_00",
+        "gpt4_account_03",
+        "gpt4_account_06",
+        "gpt4_account_08"
+      ],
+      "dominant_model": "gpt4",
+      "model_distribution": {
+        "gpt4": 4
+      },
+      "binding_features": {
+        "type_token_ratio": {
+          "mean": 0.6944,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "hapax_ratio": {
+          "mean": 0.72,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "top10_concentration": {
+          "mean": 0.3889,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "avg_word_length": {
+          "mean": 6.0278,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "avg_sentence_length": {
+          "mean": 5.9167,
+          "std": 0.0,
+          "uniformity": 1.0
+        }
+      },
+      "coordination_signal": 1.0,
+      "avg_llm_density": 2.0833,
+      "avg_typo_rate": 0.0,
+      "is_bot_network": true
+    },
+    "2": {
+      "member_count": 3,
+      "members": [
+        "human_account_00",
+        "human_account_03",
+        "human_account_09"
+      ],
+      "dominant_model": "human",
+      "model_distribution": {
+        "human": 3
+      },
+      "binding_features": {
+        "type_token_ratio": {
+          "mean": 0.8228,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "hapax_ratio": {
+          "mean": 0.8923,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "top10_concentration": {
+          "mean": 0.3038,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "avg_word_length": {
+          "mean": 3.8608,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "avg_sentence_length": {
+          "mean": 11.4286,
+          "std": 0.0,
+          "uniformity": 1.0
+        }
+      },
+      "coordination_signal": 0.9955,
+      "avg_llm_density": 0.0,
+      "avg_typo_rate": 0.05,
+      "is_bot_network": true
+    },
+    "3": {
+      "member_count": 2,
+      "members": [
+        "patriot_eagle_55",
+        "wkp_truth_seeker"
+      ],
+      "dominant_model": "human",
+      "model_distribution": {
+        "human": 2
+      },
+      "binding_features": {
+        "type_token_ratio": {
+          "mean": 0.79,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "hedge_rate": {
+          "mean": 0.0,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "transition_rate": {
+          "mean": 0.0,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "comma_rate": {
+          "mean": 0.0,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "semicolon_rate": {
+          "mean": 0.0,
+          "std": 0.0,
+          "uniformity": 1.0
+        }
+      },
+      "coordination_signal": 0.7763,
+      "avg_llm_density": 0.0,
+      "avg_typo_rate": 0.0,
+      "is_bot_network": true
+    },
+    "4": {
+      "member_count": 9,
+      "members": [
+        "stealth_op_a_acct03",
+        "stealth_op_a_acct04",
+        "stealth_op_b_acct02",
+        "stealth_op_b_acct04",
+        "stealth_op_c_acct00",
+        "stealth_op_c_acct01",
+        "stealth_op_c_acct02",
+        "stealth_op_c_acct04",
+        "stealth_op_d_acct02"
+      ],
+      "dominant_model": "human",
+      "model_distribution": {
+        "human": 9
+      },
+      "binding_features": {
+        "transition_rate": {
+          "mean": 0.0,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "semicolon_rate": {
+          "mean": 0.0,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "intra_vocab_variance": {
+          "mean": 0.0007,
+          "std": 0.0004,
+          "uniformity": 0.9996
+        },
+        "contraction_rate": {
+          "mean": 0.0341,
+          "std": 0.0041,
+          "uniformity": 0.996
+        },
+        "intra_hedge_variance": {
+          "mean": 0.007,
+          "std": 0.0052,
+          "uniformity": 0.9948
+        }
+      },
+      "coordination_signal": 0.6881,
+      "avg_llm_density": 0.0788,
+      "avg_typo_rate": 0.0165,
+      "is_bot_network": true
+    },
+    "5": {
+      "member_count": 2,
+      "members": [
+        "stealth_op_d_acct00",
+        "stealth_op_d_acct04"
+      ],
+      "dominant_model": "human",
+      "model_distribution": {
+        "human": 2
+      },
+      "binding_features": {
+        "transition_rate": {
+          "mean": 0.0,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "semicolon_rate": {
+          "mean": 0.0,
+          "std": 0.0,
+          "uniformity": 1.0
+        },
+        "intra_hedge_variance": {
+          "mean": 0.0026,
+          "std": 0.0002,
+          "uniformity": 0.9998
+        },
+        "intra_vocab_variance": {
+          "mean": 0.0031,
+          "std": 0.0003,
+          "uniformity": 0.9997
+        },
+        "comma_rate": {
+          "mean": 0.039,
+          "std": 0.0015,
+          "uniformity": 0.9985
+        }
+      },
+      "coordination_signal": 0.7505,
+      "avg_llm_density": 0.0713,
+      "avg_typo_rate": 0.007,
+      "is_bot_network": true
+    }
+  },
+  "stealth_subclusters": {
+    "0": {
+      "members": [
+        "human_account_00",
+        "human_account_03",
+        "human_account_09"
+      ],
+      "member_count": 3,
+      "stealth_score": 0.6329,
+      "coordination": 0.8852,
+      "avg_naturalness": 0.25,
+      "avg_formality_variance": 0.004815,
+      "avg_pairwise_similarity": -0.4577,
+      "is_stealth_network": true
+    },
+    "1": {
+      "members": [
+        "stealth_op_c_acct00",
+        "stealth_op_c_acct01"
+      ],
+      "member_count": 2,
+      "stealth_score": 0.5102,
+      "coordination": 0.6782,
+      "avg_naturalness": 0.5,
+      "avg_formality_variance": 0.000708,
+      "avg_pairwise_similarity": -1.0,
+      "is_stealth_network": true
+    }
+  }
+}
