@@ -174,6 +174,31 @@ DISCRIMINATING_FEATURES = [
     "intra_jargon_variance",
 ]
 
+# Features used for stealth bot second-pass detection
+STEALTH_FEATURES = [
+    # Naturalness metrics (stealth bots are "too clean casual")
+    "formality_variance",
+    "naturalness_score",
+    # Character-level fingerprint
+    "char_trigram_entropy",
+    "punctuation_sequence_entropy",
+    # Structural micro-patterns
+    "sentence_length_variance",
+    "paragraph_rhythm_score",
+    "opener_diversity",
+    "intra_vocab_variance",
+    "intra_structure_variance",
+    "intra_hedge_variance",
+    "intra_punctuation_variance",
+    "intra_jargon_variance",
+    "intra_typo_variance",
+    # Vocabulary fingerprint
+    "type_token_ratio",
+    "avg_syllables",
+    "contraction_rate",
+    "avg_word_length",
+]
+
 
 # ============================================================
 # 1. STYLOMETRIC FEATURE EXTRACTOR (BASE + ENHANCED)
@@ -393,6 +418,60 @@ class StylometricExtractor:
             features["intra_syllable_variance"] = 1.0
             features["intra_typo_variance"] = 1.0
 
+        # ---- STEALTH BOT DETECTION FEATURES ----
+
+        # Formality variance: real humans shift formality across posts;
+        # LLM personas maintain consistent formality level
+        per_post_formality = []
+        for post in posts:
+            if not post.strip():
+                continue
+            p_tokens = re.findall(r"\b[a-zA-Z']+\b", post)
+            if not p_tokens:
+                continue
+            # Formality signals: contractions (informal), long words (formal),
+            # slang markers (informal), transition words (formal)
+            contractions = len(re.findall(r"\b\w+'\w+\b", post)) / max(len(p_tokens), 1)
+            long_words = sum(1 for t in p_tokens if len(t) > 8) / max(len(p_tokens), 1)
+            slang = len(re.findall(
+                r'\b(u|ur|r|n|thru|gonna|wanna|gotta|kinda|sorta|ya|yep|nope|lol|omg|tbh|idk|imo|smh|btw|ngl|rn|fr|ong|lowkey|highkey|bruh|fam|lit|bet|slay|cap|deadass)\b',
+                post.lower()
+            )) / max(len(p_tokens), 1)
+            transitions = sum(post.lower().count(t) for t in self.TRANSITION_WORDS) / max(len(p_tokens) / 10, 1)
+            formality = (long_words + transitions) - (contractions + slang)
+            per_post_formality.append(formality)
+
+        if len(per_post_formality) >= 2:
+            features["formality_variance"] = float(np.var(per_post_formality))
+            features["formality_range"] = float(max(per_post_formality) - min(per_post_formality))
+        else:
+            features["formality_variance"] = 0.1
+            features["formality_range"] = 0.2
+
+        # Naturalness score: combines multiple signals that separate
+        # "genuine casual" from "LLM-generated casual"
+        # Real casual text has: varied sentence lengths, occasional typos,
+        # inconsistent punctuation, mixed formality
+        genuine_typo = features.get("typo_rate", 0) > 0
+        has_variance = features.get("intra_structure_variance", 0) > 2.0
+        mixed_formality = features.get("formality_variance", 0) > 0.005
+        low_rhythm = features.get("paragraph_rhythm_score", 1.0) < 0.7
+        naturalness = sum([
+            0.25 * float(genuine_typo),
+            0.25 * float(has_variance),
+            0.25 * float(mixed_formality),
+            0.25 * float(low_rhythm),
+        ])
+        features["naturalness_score"] = naturalness
+
+        # Character-level trigram entropy: catches shared LLM "writing DNA"
+        # Same model produces similar character-level distributions
+        features["char_trigram_entropy"] = self._char_trigram_entropy(full_text)
+
+        # Punctuation sequence entropy: how predictable is punctuation ordering?
+        # LLMs produce more regular punctuation patterns
+        features["punctuation_sequence_entropy"] = self._punctuation_entropy(full_text)
+
         return features
 
     # ---- Base helpers ----
@@ -511,6 +590,42 @@ class StylometricExtractor:
             "double_char_rate": double_chars / max(total_words, 1),
         }
 
+    def _char_trigram_entropy(self, text):
+        """Shannon entropy of character trigram distribution."""
+        text = text.lower()
+        if len(text) < 3:
+            return 0.0
+        trigrams = Counter()
+        for i in range(len(text) - 2):
+            trigrams[text[i:i+3]] += 1
+        total = sum(trigrams.values())
+        if total == 0:
+            return 0.0
+        entropy = 0.0
+        for count in trigrams.values():
+            p = count / total
+            if p > 0:
+                entropy -= p * math.log2(p)
+        return entropy
+
+    def _punctuation_entropy(self, text):
+        """Entropy of punctuation character sequence."""
+        punct_seq = [c for c in text if c in '.,!?;:—-()[]"\'']
+        if len(punct_seq) < 3:
+            return 0.0
+        bigrams = Counter()
+        for i in range(len(punct_seq) - 1):
+            bigrams[punct_seq[i] + punct_seq[i+1]] += 1
+        total = sum(bigrams.values())
+        if total == 0:
+            return 0.0
+        entropy = 0.0
+        for count in bigrams.values():
+            p = count / total
+            if p > 0:
+                entropy -= p * math.log2(p)
+        return entropy
+
     def _intra_var(self, per_post, key):
         vals = [p[key] for p in per_post if key in p]
         return float(np.var(vals)) if len(vals) >= 2 else 1.0
@@ -542,7 +657,11 @@ class StylometricExtractor:
             "intra_punctuation_variance", "intra_opener_variance",
             "intra_jargon_variance", "intra_syllable_variance", "intra_typo_variance",
         ]
-        return {k: 0.0 for k in base_keys + enhanced_keys}
+        stealth_keys = [
+            "formality_variance", "formality_range", "naturalness_score",
+            "char_trigram_entropy", "punctuation_sequence_entropy",
+        ]
+        return {k: 0.0 for k in base_keys + enhanced_keys + stealth_keys}
 
 
 # ============================================================
@@ -708,6 +827,131 @@ class AccountClusterAnalyzer:
             {"account_id": a, "cluster_id": int(l), "is_noise": l == -1}
             for a, l in zip(ids, labels)
         ])
+
+    def detect_stealth_subclusters(self, cluster_df, fingerprints, test_account_ids):
+        """
+        Second-pass detection: look for stealth bot sub-clusters among
+        test accounts that weren't flagged as obvious bots.
+
+        Stealth bots evade pass 1 by mimicking human style, but they still
+        share operator-level writing DNA that a tighter DBSCAN on stealth-specific
+        features can catch.
+        """
+        # Candidates: all test accounts NOT already in known bot clusters
+        known_bot_clusters = set()
+        cluster_summary_temp = {}
+        for cid in cluster_df[~cluster_df["is_noise"]]["cluster_id"].unique():
+            members = cluster_df[cluster_df["cluster_id"] == int(cid)]["account_id"].tolist()
+            fps = [fingerprints[a] for a in members if a in fingerprints]
+            if fps:
+                avg_llm = float(np.mean([fp.get("llm_phrase_density", 0) for fp in fps]))
+                if avg_llm > 0.5:  # clearly LLM-generated clusters
+                    known_bot_clusters.add(int(cid))
+
+        candidates = set()
+        for aid in test_account_ids:
+            row = cluster_df[cluster_df["account_id"] == aid]
+            if len(row) == 0:
+                continue
+            cid = int(row.iloc[0]["cluster_id"])
+            if cid not in known_bot_clusters:
+                candidates.add(aid)
+
+        if len(candidates) < 3:
+            return [], {}
+
+        # Build stealth feature matrix
+        candidate_list = sorted(candidates)
+        stealth_keys = [k for k in STEALTH_FEATURES if k in fingerprints[candidate_list[0]]]
+        mat = np.array([
+            [fingerprints[a].get(k, 0.0) for k in stealth_keys]
+            for a in candidate_list
+        ])
+
+        # Tighter DBSCAN on stealth features — try multiple epsilon values
+        scaler2 = StandardScaler()
+        mat_std = scaler2.fit_transform(mat)
+        # Replace NaN from constant features
+        mat_std = np.nan_to_num(mat_std, nan=0.0)
+
+        # Try progressively tighter epsilon to find stealth sub-clusters
+        best_labels = None
+        best_n_clusters = 0
+        for eps in [1.0, 0.8, 0.6]:
+            labels = DBSCAN(
+                eps=eps,
+                min_samples=2,
+                metric="euclidean"
+            ).fit_predict(mat_std)
+            n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
+            if n_clusters > best_n_clusters:
+                best_n_clusters = n_clusters
+                best_labels = labels
+        labels = best_labels if best_labels is not None else np.full(len(candidate_list), -1)
+
+        subclusters = {}
+        for label in set(labels):
+            if label == -1:
+                continue
+            members = [candidate_list[i] for i, l in enumerate(labels) if l == label]
+            if len(members) < 2:
+                continue
+
+            # Compute stealth coordination score
+            member_mat = mat_std[[i for i, l in enumerate(labels) if l == label]]
+            dists = euclidean_distances(member_mat)
+            avg_dist = dists[np.triu_indices_from(dists, k=1)].mean()
+            coordination = max(0, 1.0 - avg_dist / 3.0)
+
+            # Naturalness analysis
+            avg_naturalness = float(np.mean([
+                fingerprints[m].get("naturalness_score", 1.0) for m in members
+            ]))
+            avg_formality_var = float(np.mean([
+                fingerprints[m].get("formality_variance", 0.1) for m in members
+            ]))
+
+            # Cross-member style similarity (pairwise on ALL features)
+            all_feat_keys = list(DISCRIMINATING_FEATURES) + stealth_keys
+            all_feat_keys = list(dict.fromkeys(all_feat_keys))  # dedupe
+            pair_mat = np.array([
+                [fingerprints[m].get(k, 0.0) for k in all_feat_keys]
+                for m in members
+            ])
+            pair_std = StandardScaler().fit_transform(pair_mat)
+            # Replace NaN with 0 (constant features produce NaN after scaling)
+            pair_std = np.nan_to_num(pair_std, nan=0.0)
+            pair_sim = cosine_similarity(pair_std)
+            pair_sim = np.nan_to_num(pair_sim, nan=0.0)
+            avg_pair_sim = pair_sim[np.triu_indices_from(pair_sim, k=1)].mean()
+
+            # Stealth bot score: high coordination + low naturalness + high pair similarity
+            stealth_score = (
+                0.35 * coordination +
+                0.25 * (1.0 - avg_naturalness) +
+                0.25 * float(np.clip(avg_pair_sim, 0, 1)) +
+                0.15 * (1.0 - float(np.clip(avg_formality_var * 20, 0, 1)))
+            )
+
+            is_stealth = stealth_score > 0.45 and len(members) >= 2
+
+            subclusters[label] = {
+                "members": members,
+                "member_count": len(members),
+                "stealth_score": round(stealth_score, 4),
+                "coordination": round(coordination, 4),
+                "avg_naturalness": round(avg_naturalness, 4),
+                "avg_formality_variance": round(avg_formality_var, 6),
+                "avg_pairwise_similarity": round(float(avg_pair_sim), 4),
+                "is_stealth_network": is_stealth,
+            }
+
+        stealth_accounts = []
+        for info in subclusters.values():
+            if info["is_stealth_network"]:
+                stealth_accounts.extend(info["members"])
+
+        return stealth_accounts, subclusters
 
     def describe_clusters(self, cluster_df, fingerprints):
         summary = {}
@@ -964,7 +1208,7 @@ class StyleShieldScorer:
         self.confidence_calc  = AdaptiveConfidenceCalculator()
         self.loader           = CSVLoader()
 
-    def analyze_csv(self, train_paths: List[str], test_paths: List[str]) -> Tuple[pd.DataFrame, Dict]:
+    def analyze_csv(self, train_paths: List[str], test_paths: List[str]) -> Tuple[pd.DataFrame, Dict, Dict]:
         """Load separate training and testing CSV files."""
         print(f"\nLoading training data from {len(train_paths)} file(s)...")
         train_accounts = self.loader.load_multiple(*train_paths) if train_paths else {}
@@ -977,10 +1221,10 @@ class StyleShieldScorer:
 
         return self.analyze_accounts(test_accounts, train_accounts=train_accounts)
 
-    def analyze_accounts(self, accounts: Dict, train_accounts: Optional[Dict] = None) -> Tuple[pd.DataFrame, Dict]:
+    def analyze_accounts(self, accounts: Dict, train_accounts: Optional[Dict] = None) -> Tuple[pd.DataFrame, Dict, Dict]:
         """
-        Full pipeline: extract → score → cluster → confidence → model ID.
-        Returns (results_df, cluster_summary).
+        Full pipeline: extract → score → cluster → stealth detect → confidence → model ID.
+        Returns (results_df, cluster_summary, stealth_subclusters).
         """
         if train_accounts is None:
             train_accounts = {}
@@ -991,7 +1235,7 @@ class StyleShieldScorer:
 
         # 1. Fingerprinting (enhanced: base + LLM signatures + typos + temporal)
         all_accounts = {**train_accounts, **accounts}
-        print(f"\n[1/4] Extracting enhanced stylometric fingerprints ({len(all_accounts)} accounts total)...")
+        print(f"\n[1/5] Extracting enhanced stylometric fingerprints ({len(all_accounts)} accounts total)...")
         fingerprints = {}
         for aid, data in all_accounts.items():
             fingerprints[aid] = self.extractor.extract(
@@ -1000,7 +1244,7 @@ class StyleShieldScorer:
             )
 
         # 2. Per-account bot scores (only for test accounts)
-        print("\n[2/4] Computing multi-metric bot scores for test accounts...")
+        print("\n[2/5] Computing multi-metric bot scores for test accounts...")
         all_scores = {}
         for account_id in accounts:
             bot_score, metrics = self.scorer.compute_combined_bot_score(
@@ -1012,14 +1256,25 @@ class StyleShieldScorer:
             all_scores[account_id] = {"bot_score": bot_score, "metrics": metrics}
 
         # 3. Clustering (enhanced: StandardScaler + euclidean DBSCAN)
-        print("\n[3/4] Running enhanced DBSCAN cluster analysis...")
+        print("\n[3/5] Running enhanced DBSCAN cluster analysis...")
         cluster_df      = self.clusterer.cluster(fingerprints)
         test_cluster_df = cluster_df[cluster_df["account_id"].isin(accounts.keys())]
         cluster_sizes   = cluster_df[~cluster_df["is_noise"]].groupby("cluster_id").size().to_dict()
         cluster_summary = self.clusterer.describe_clusters(cluster_df, fingerprints)
 
-        # 4. Adaptive confidence + model identification
-        print("\n[4/4] Computing adaptive confidence scores...")
+        # 4. SECOND PASS: Stealth bot detection within human clusters
+        print("\n[4/5] Running stealth bot detection (second pass)...")
+        stealth_accounts, stealth_subclusters = self.clusterer.detect_stealth_subclusters(
+            cluster_df, fingerprints, set(accounts.keys())
+        )
+        stealth_set = set(stealth_accounts)
+        if stealth_accounts:
+            print(f"  Found {len(stealth_accounts)} suspected stealth bot accounts in {sum(1 for v in stealth_subclusters.values() if v['is_stealth_network'])} sub-clusters")
+        else:
+            print("  No stealth bot sub-clusters detected")
+
+        # 5. Adaptive confidence + model identification
+        print("\n[5/5] Computing adaptive confidence scores...")
         rows = []
         for _, row in test_cluster_df.iterrows():
             account_id   = row["account_id"]
@@ -1036,6 +1291,20 @@ class StyleShieldScorer:
                 total_accounts=len(all_accounts),
             )
 
+            # Stealth bot boost: if second pass flagged this account,
+            # boost confidence and update model identification
+            is_stealth = account_id in stealth_set
+            if is_stealth:
+                # Find which subcluster this account belongs to
+                stealth_score = 0.0
+                for sc_info in stealth_subclusters.values():
+                    if account_id in sc_info["members"]:
+                        stealth_score = sc_info["stealth_score"]
+                        break
+                # Blend stealth score into confidence
+                confidence = max(confidence, 0.5 * confidence + 0.5 * stealth_score)
+                method = "stealth_detection"
+
             # Model identification
             model_probs = {
                 "gpt4": fp.get("model_prob_gpt4", 0),
@@ -1044,6 +1313,8 @@ class StyleShieldScorer:
                 "human": fp.get("model_prob_human", 0),
             }
             likely_model = max(model_probs, key=model_probs.get)
+            if is_stealth and likely_model == "human":
+                likely_model = "stealth_bot"
 
             rows.append({
                 "account_id":        account_id,
@@ -1053,9 +1324,12 @@ class StyleShieldScorer:
                 "cluster_id":        cluster_id,
                 "is_noise":          row["is_noise"],
                 "likely_model":      likely_model,
-                "model_confidence":  model_probs[likely_model],
+                "model_confidence":  model_probs.get(likely_model, 0) if likely_model != "stealth_bot" else stealth_score,
                 "llm_phrase_density": round(fp.get("llm_phrase_density", 0), 4),
                 "typo_rate":         round(fp.get("typo_rate", 0), 4),
+                "naturalness_score": round(fp.get("naturalness_score", 1.0), 4),
+                "formality_variance": round(fp.get("formality_variance", 0.1), 6),
+                "is_stealth_suspect": is_stealth,
                 **score_data["metrics"],
             })
 
@@ -1068,9 +1342,13 @@ class StyleShieldScorer:
         print(f"Core population (train): {len(train_accounts)}")
         print(f"Accounts analyzed (test): {len(accounts)}")
         bot_networks = sum(1 for v in cluster_summary.values() if v.get("is_bot_network", False))
-        print(f"Bot networks found:   {bot_networks}")
-        print(f"Total clusters:       {len(cluster_summary)}")
-        print(f"High confidence >0.8: {(results_df['confidence'] > 0.8).sum()}")
+        stealth_networks = sum(1 for v in stealth_subclusters.values() if v.get("is_stealth_network", False))
+        print(f"Bot networks found:     {bot_networks}")
+        print(f"Stealth networks found: {stealth_networks}")
+        print(f"Total clusters:         {len(cluster_summary)}")
+        print(f"High confidence >0.8:   {(results_df['confidence'] > 0.8).sum()}")
+        if stealth_accounts:
+            print(f"Stealth bot suspects:   {len(stealth_accounts)}")
 
         # Noise (organic) accounts
         noise_ids = results_df[results_df["is_noise"]]["account_id"].tolist()
@@ -1078,7 +1356,7 @@ class StyleShieldScorer:
             avg_human_prob = float(np.mean([
                 fingerprints[a].get("model_prob_human", 0) for a in noise_ids
             ]))
-            print(f"Organic (noise):      {len(noise_ids)} (avg human prob: {avg_human_prob:.3f})")
+            print(f"Organic (noise):        {len(noise_ids)} (avg human prob: {avg_human_prob:.3f})")
 
         test_cids = test_cluster_df[~test_cluster_df["is_noise"]]["cluster_id"].unique()
         for cid in test_cids:
@@ -1094,7 +1372,19 @@ class StyleShieldScorer:
             print(f"  Binding: {', '.join(list(info.get('binding_features', {}).keys())[:3])}")
             print(f"  Test Members: {', '.join(test_members[:10])}{'...' if len(test_members) > 10 else ''}")
 
-        return results_df, cluster_summary
+        # Stealth sub-cluster details
+        for sc_id, sc_info in stealth_subclusters.items():
+            if not sc_info["is_stealth_network"]:
+                continue
+            print(f"\n[STEALTH NETWORK] Sub-cluster {sc_id}: {sc_info['member_count']} accounts")
+            print(f"  Stealth score:      {sc_info['stealth_score']:.3f}")
+            print(f"  Coordination:       {sc_info['coordination']:.3f}")
+            print(f"  Avg naturalness:    {sc_info['avg_naturalness']:.3f}")
+            print(f"  Formality variance: {sc_info['avg_formality_variance']:.6f}")
+            print(f"  Pairwise similarity:{sc_info['avg_pairwise_similarity']:.3f}")
+            print(f"  Members: {', '.join(sc_info['members'][:10])}{'...' if sc_info['member_count'] > 10 else ''}")
+
+        return results_df, cluster_summary, stealth_subclusters
 
     def similarity_matrix(self, accounts: Dict) -> Tuple[np.ndarray, List[str]]:
         fps = {aid: self.extractor.extract(data.get("posts", []), data.get("posting_hours"))
@@ -1213,7 +1503,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     if args.csv_files:
-        results, clusters = scorer.analyze_csv([], args.csv_files)
+        results, clusters, stealth = scorer.analyze_csv([], args.csv_files)
     else:
         # Auto-discover CSVs in training and test folders
         train_dir = Path("data/training")
@@ -1224,7 +1514,7 @@ if __name__ == "__main__":
 
         if train_csvs or test_csvs:
             print(f"Auto-discovery: found {len(train_csvs)} training and {len(test_csvs)} testing CSVs.")
-            results, clusters = scorer.analyze_csv(
+            results, clusters, stealth = scorer.analyze_csv(
                 [str(p) for p in train_csvs],
                 [str(p) for p in test_csvs]
             )
@@ -1232,13 +1522,14 @@ if __name__ == "__main__":
             print("No CSVs found in data/training or data/test.")
             print("Running on built-in synthetic dataset.\n")
             csv_path = _write_synthetic_csvs()
-            results, clusters = scorer.analyze_csv([], [csv_path])
+            results, clusters, stealth = scorer.analyze_csv([], [csv_path])
 
     # Print top results
     print("\n\nTOP 15 ACCOUNTS BY CONFIDENCE:")
     print("-" * 90)
     cols = ["account_id", "confidence", "bot_score", "cluster_id", "likely_model",
-            "llm_phrase_density", "typo_rate", "structural_regularity"]
+            "is_stealth_suspect", "naturalness_score", "llm_phrase_density", "typo_rate",
+            "structural_regularity"]
     available_cols = [c for c in cols if c in results.columns]
     print(results[available_cols].head(15).to_string(index=False))
 
@@ -1247,6 +1538,9 @@ if __name__ == "__main__":
     clusters_path = args.output.replace(".csv", "_clusters.json")
     with open(clusters_path, "w") as f:
         json.dump(_convert_numpy(clusters), f, indent=2)
+    stealth_path = args.output.replace(".csv", "_stealth.json")
+    with open(stealth_path, "w") as f:
+        json.dump(_convert_numpy(stealth), f, indent=2)
 
-    print(f"\nExported: {args.output}, {clusters_path}")
+    print(f"\nExported: {args.output}, {clusters_path}, {stealth_path}")
     print("StyleShield complete.")
