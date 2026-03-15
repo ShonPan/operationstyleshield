@@ -1490,8 +1490,12 @@ if __name__ == "__main__":
         help="DBSCAN min_samples (default 2)"
     )
     parser.add_argument(
-        "--output", default="styleshield_results.csv",
-        help="Output CSV path (default: styleshield_results.csv)"
+        "--output", default="demo_results.csv",
+        help="Output CSV path (default: demo_results.csv)"
+    )
+    parser.add_argument(
+        "--clusters-output", default="demo_cluster.json",
+        help="Output clusters JSON path (default: demo_cluster.json)"
     )
     args = parser.parse_args()
 
@@ -1535,12 +1539,12 @@ if __name__ == "__main__":
 
     # Export
     results.to_csv(args.output, index=False)
-    clusters_path = args.output.replace(".csv", "_clusters.json")
-    with open(clusters_path, "w") as f:
-        json.dump(_convert_numpy(clusters), f, indent=2)
-    stealth_path = args.output.replace(".csv", "_stealth.json")
-    with open(stealth_path, "w") as f:
-        json.dump(_convert_numpy(stealth), f, indent=2)
+    cluster_data = {
+        "clusters": _convert_numpy(clusters),
+        "stealth_subclusters": _convert_numpy(stealth),
+    }
+    with open(args.clusters_output, "w") as f:
+        json.dump(cluster_data, f, indent=2)
 
-    print(f"\nExported: {args.output}, {clusters_path}, {stealth_path}")
+    print(f"\nExported: {args.output}, {args.clusters_output}")
     print("StyleShield complete.")
