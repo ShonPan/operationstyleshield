@@ -91,7 +91,7 @@ def run_enhanced_pipeline(csv_paths, epsilon=1.5, min_samples=2):
     # 2b. t-SNE projection for network graph layout
     perplexity = min(15, len(ids) - 1)
     tsne = TSNE(n_components=2, perplexity=perplexity, random_state=42,
-                n_iter=1000, learning_rate='auto', init='pca')
+                max_iter=1000, learning_rate='auto', init='pca')
     coords = tsne.fit_transform(mat_std)
     for dim in range(2):
         mn, mx = coords[:, dim].min(), coords[:, dim].max()
