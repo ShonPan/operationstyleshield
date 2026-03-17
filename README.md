@@ -1,5 +1,5 @@
-# StyleShield
-### Coordination detection via stylometric anomaly analysis
+# Ground Truth
+### Discourse authentication through the topology of language
 
 **Live demo:** [operationstyleshield.vercel.app](https://operationstyleshield.vercel.app/)
 **Backend API:** [operationstyleshield-production.up.railway.app](https://operationstyleshield-production.up.railway.app)
@@ -7,11 +7,11 @@
 
 ---
 
-## What is StyleShield?
+## What is Ground Truth?
 
-StyleShield detects coordinated inauthentic behavior by analyzing the natural topology of language. Human writing has predictable texture — varied vocabulary, inconsistent rhythm, personal quirks — with natural entropy. When multiple accounts produce writing that deviates from this natural gradient in the same way, it's evidence of coordination — whether from bot farms, LLM-generated personas, or scripted troll operations.
+Ground Truth authenticates whether online conversations are organic or manufactured. Human writing has natural texture — varied vocabulary, inconsistent rhythm, personal quirks. When multiple accounts deviate from this natural gradient in the same way, it's evidence of coordination — whether from bot farms, LLM-generated personas, or scripted operations.
 
-Adapted from **Xenarch**, a planetary technosignature detection system that found the Apollo 11 lunar lander at 99.58% confidence, StyleShield applies the same multi-metric anomaly detection to social media.
+Adapted from **Xenarch**, a planetary technosignature detection system that found the Apollo 11 lunar lander at 99.58% confidence, Ground Truth applies the same multi-metric anomaly detection to social media.
 
 ---
 
@@ -65,7 +65,7 @@ Each account should have 3+ posts for reliable analysis.
 
 ## How it works
 
-StyleShield extracts 40+ stylometric features per account, clusters accounts by writing fingerprint similarity using DBSCAN, and identifies coordinated networks that no single-post classifier can detect.
+Ground Truth extracts 40+ stylometric features per account, clusters accounts by writing fingerprint similarity using DBSCAN, and identifies coordinated networks that no single-post classifier can detect.
 
 **Detection is purely structural.** No labels, no metadata, no content moderation. If accounts write too similarly across enough dimensions, they cluster — and that coordination is the signal.
 
@@ -81,7 +81,7 @@ StyleShield extracts 40+ stylometric features per account, clusters accounts by 
 
 In testing against stealth bots — AI-generated accounts prompted to mimic human writing:
 
-| | StyleShield | Naive LLM judge |
+| | Ground Truth | Naive LLM judge |
 |---|---|---|
 | F1 Score | **0.758** | 0.408 |
 | Stealth bots caught | **65%** | 0% |

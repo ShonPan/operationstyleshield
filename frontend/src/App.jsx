@@ -919,12 +919,11 @@ function DefaultBriefing({ summary, clusters }) {
 
       <Card label="Methodology">
         <div style={{ fontSize: 12, lineHeight: 1.7, opacity: 0.6 }}>
-          StyleShield detects coordinated inauthentic behavior by analyzing the natural topology
-          of language. Human writing has an expected texture — varied vocabulary, inconsistent
-          rhythm, personal quirks, and other forms relevant to attractors at the time. When multiple
-          accounts produce writing that deviates from this natural gradient in the same way, this
-          can be evidence of collusion or manufactured consensus: whether from bot farms,
-          LLM-generated personas, or scripted troll operations.
+          Ground Truth authenticates whether online conversations are organic or manufactured.
+          Human writing has natural texture — varied vocabulary, inconsistent rhythm, personal
+          quirks. When multiple accounts deviate from this natural gradient in the same way,
+          it's evidence of coordination — whether from bot farms, LLM-generated personas,
+          or scripted operations.
         </div>
       </Card>
 
@@ -1173,7 +1172,7 @@ function TimelineSimulation({ results, clusters, noise }) {
       yMax = 105;
       datasets = [
         {
-          label: "Without StyleShield",
+          label: "Without Ground Truth",
           data: humanPctNo,
           borderColor: "#C0392B",
           backgroundColor: "rgba(192,57,43,0.06)",
@@ -1183,7 +1182,7 @@ function TimelineSimulation({ results, clusters, noise }) {
           borderWidth: 2,
         },
         {
-          label: "With StyleShield",
+          label: "With Ground Truth",
           data: humanPctWith,
           borderColor: "#4A6FA5",
           backgroundColor: "rgba(74,111,165,0.06)",
@@ -1295,15 +1294,15 @@ function TimelineSimulation({ results, clusters, noise }) {
     scenario === "no"
       ? `Bot volume overtakes human volume by hour 24. By hour 48, ${distortionNo}% of discourse is fabricated. Anyone reading this feed sees a manufactured consensus.`
       : scenario === "with"
-        ? "Bots activate at hour 12. StyleShield detects coordination by hour 16. Within 2 hours, 75% of bot content is flagged. The human voice stays dominant."
-        : `The gap between the lines is the discourse StyleShield saved. Same bot farm, same campaign. ${rescued} percentage points of discourse rescued from manipulation.`;
+        ? "Bots activate at hour 12. Ground Truth detects coordination by hour 16. Within 2 hours, 75% of bot content is flagged. The human voice stays dominant."
+        : `The gap between the lines is the discourse Ground Truth saved. Same bot farm, same campaign. ${rescued} percentage points of discourse rescued from manipulation.`;
 
   return (
     <div>
       <div className="scenario-toggle">
         {[
-          ["no", "Without StyleShield"],
-          ["with", "With StyleShield"],
+          ["no", "Without Ground Truth"],
+          ["with", "With Ground Truth"],
           ["both", "Side by side"],
         ].map(([key, label]) => (
           <button
@@ -1345,7 +1344,7 @@ function TimelineSimulation({ results, clusters, noise }) {
         </div>
         <div style={{ fontSize: 12, opacity: 0.5, marginTop: 8, lineHeight: 1.7 }}>
           Detected networks: {clusterCount} clusters, {coordinated} coordinated accounts.
-          Detection capability: StyleShield identified coordination within 4 hours of activation in controlled testing.
+          Detection capability: Ground Truth identified coordination within 4 hours of activation in controlled testing.
         </div>
       </div>
     </div>
@@ -1586,8 +1585,8 @@ export default function App() {
       <div className="header">
         <div className="brand">
           <div className="pulse-dot" />
-          <span className="brand-name">STYLESHIELD</span>
-          <span className="brand-sub">coordination detection</span>
+          <span className="brand-name">GROUND TRUTH</span>
+          <span className="brand-sub">discourse authentication</span>
         </div>
         <div className="dataset-bar">
           {hasDashboard && (
