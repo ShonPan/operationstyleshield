@@ -1,5 +1,5 @@
 """
-StyleShield API — runs the actual analysis pipeline on uploaded CSVs.
+Ground Truth API — runs the actual analysis pipeline on uploaded CSVs.
 Streams progress updates via Server-Sent Events so the frontend can show a live console.
 """
 
@@ -283,7 +283,7 @@ def _json_safe(obj):
 @app.route('/', methods=['GET'])
 @app.route('/api/health', methods=['GET'])
 def health():
-    return jsonify({"ok": True})
+    return jsonify({"status": "ok", "service": "Ground Truth API"})
 
 
 @app.route('/api/analyze_stream', methods=['POST'])
@@ -517,5 +517,5 @@ def download_clusters():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5002))
-    print(f"StyleShield API starting on http://localhost:{port}")
+    print(f"Ground Truth API starting on http://localhost:{port}")
     app.run(host='0.0.0.0', port=port, debug=False)

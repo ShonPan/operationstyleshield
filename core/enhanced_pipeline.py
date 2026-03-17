@@ -210,7 +210,7 @@ def run_enhanced_pipeline(csv_paths, epsilon=1.5, min_samples=2):
 
     # Print report
     print("\n" + "=" * 70)
-    print("STYLESHIELD ENHANCED DETECTION REPORT")
+    print("GROUND TRUTH ANALYSIS REPORT")
     print("=" * 70)
     print(f"  Accounts analyzed:  {len(accounts)}")
     print(f"  Bot networks found: {sum(1 for v in cluster_summary.values() if v['is_bot_network'])}")

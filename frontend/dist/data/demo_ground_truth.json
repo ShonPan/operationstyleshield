@@ -1,0 +1,222 @@
+{
+  "name_mapping": {
+    "ryanstan95": {
+      "original": "human_clarkhook",
+      "type": "human"
+    },
+    "jen_nic27": {
+      "original": "gpt4_account_08",
+      "type": "gpt4_bot"
+    },
+    "nicolebase12": {
+      "original": "stealth_op_a_acct03",
+      "type": "stealth_bot"
+    },
+    "eric_xo4": {
+      "original": "human_jamescalderwood",
+      "type": "human"
+    },
+    "samantha77": {
+      "original": "stealth_op_c_acct02",
+      "type": "stealth_bot"
+    },
+    "emma_rn26": {
+      "original": "human_StephanSDalal",
+      "type": "human"
+    },
+    "susanhub29": {
+      "original": "human_nickpasculli",
+      "type": "human"
+    },
+    "not_james98": {
+      "original": "gpt4_account_00",
+      "type": "gpt4_bot"
+    },
+    "eric5575": {
+      "original": "human_scunning16",
+      "type": "human"
+    },
+    "lauren_sam53": {
+      "original": "innovate_first_tk",
+      "type": "haiku_bot"
+    },
+    "rachel_mood": {
+      "original": "stealth_op_d_acct01",
+      "type": "stealth_bot"
+    },
+    "amy_yo": {
+      "original": "stealth_op_d_acct04",
+      "type": "stealth_bot"
+    },
+    "case_xo94": {
+      "original": "stealth_op_d_acct03",
+      "type": "stealth_bot"
+    },
+    "just_andrew11": {
+      "original": "gadget_dave91",
+      "type": "haiku_bot"
+    },
+    "step_fr47": {
+      "original": "stealth_op_c_acct01",
+      "type": "stealth_bot"
+    },
+    "sean_hmm6": {
+      "original": "human_guichaves1989",
+      "type": "human"
+    },
+    "danielleworld11": {
+      "original": "stealth_op_b_acct03",
+      "type": "stealth_bot"
+    },
+    "brian6228": {
+      "original": "human_account_04",
+      "type": "human"
+    },
+    "tony_gre30": {
+      "original": "stealth_op_c_acct03",
+      "type": "stealth_bot"
+    },
+    "amy_jak95": {
+      "original": "claude_account_06",
+      "type": "haiku_bot"
+    },
+    "kate_ama78": {
+      "original": "gpt4_account_06",
+      "type": "gpt4_bot"
+    },
+    "jenzone60": {
+      "original": "wkp_truth_seeker",
+      "type": "haiku_bot"
+    },
+    "not_nick88": {
+      "original": "human_Lionheart_Lisa",
+      "type": "human"
+    },
+    "anna_dan14": {
+      "original": "human_tessabusenius",
+      "type": "human"
+    },
+    "courtney_dan18": {
+      "original": "stealth_op_b_acct04",
+      "type": "stealth_bot"
+    },
+    "ben3484": {
+      "original": "stealth_op_a_acct02",
+      "type": "stealth_bot"
+    },
+    "dianehub83": {
+      "original": "stealth_op_d_acct02",
+      "type": "stealth_bot"
+    },
+    "its_casey18": {
+      "original": "RealTruth_News77",
+      "type": "haiku_bot"
+    },
+    "phil4305": {
+      "original": "human_account_03",
+      "type": "human"
+    },
+    "ericcrew52": {
+      "original": "human_G_Will_Eye_Am",
+      "type": "human"
+    },
+    "nick_jes75": {
+      "original": "human_TiffanyHaverly",
+      "type": "human"
+    },
+    "just_chris15": {
+      "original": "stealth_op_b_acct02",
+      "type": "stealth_bot"
+    },
+    "josh6917": {
+      "original": "human_elias_rubin",
+      "type": "human"
+    },
+    "tompls49": {
+      "original": "human_PastorMRobinson",
+      "type": "human"
+    },
+    "meg_rn33": {
+      "original": "stealth_op_b_acct00",
+      "type": "stealth_bot"
+    },
+    "sara_hmm88": {
+      "original": "human_account_00",
+      "type": "human"
+    },
+    "dan_sup15": {
+      "original": "stealth_op_c_acct04",
+      "type": "stealth_bot"
+    },
+    "tiffany_jos68": {
+      "original": "stealth_op_a_acct00",
+      "type": "stealth_bot"
+    },
+    "casey_eats": {
+      "original": "gpt4_account_03",
+      "type": "gpt4_bot"
+    },
+    "gary1744": {
+      "original": "stealth_op_c_acct00",
+      "type": "stealth_bot"
+    },
+    "joebase78": {
+      "original": "ai_progress_now",
+      "type": "haiku_bot"
+    },
+    "lauren6127": {
+      "original": "stealth_op_d_acct00",
+      "type": "stealth_bot"
+    },
+    "susan8690": {
+      "original": "stealth_op_a_acct04",
+      "type": "stealth_bot"
+    },
+    "tara_tech": {
+      "original": "human_account_09",
+      "type": "human"
+    },
+    "ryan_chill": {
+      "original": "stealth_op_a_acct01",
+      "type": "stealth_bot"
+    },
+    "mark_ann40": {
+      "original": "patriot_eagle_55",
+      "type": "haiku_bot"
+    },
+    "alex_hmm94": {
+      "original": "human_account_08",
+      "type": "human"
+    },
+    "just_phil99": {
+      "original": "free_think_ai",
+      "type": "haiku_bot"
+    },
+    "kevin7788": {
+      "original": "stealth_op_b_acct01",
+      "type": "stealth_bot"
+    },
+    "aman_yo68": {
+      "original": "human_khartline",
+      "type": "human"
+    },
+    "eric_ok70": {
+      "original": "TechGuru_Sam42",
+      "type": "haiku_bot"
+    },
+    "heatherworld52": {
+      "original": "human_polaroiddragons",
+      "type": "human"
+    },
+    "natalieHQ67": {
+      "original": "human_A_for_AdNauseam",
+      "type": "human"
+    }
+  },
+  "type_counts": {
+    "human": 20,
+    "gpt4_bot": 4,
+    "haiku_bot": 9,
+    "stealth_bot": 20
+  }
+}
